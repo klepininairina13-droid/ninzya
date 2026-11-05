@@ -15,6 +15,7 @@
   .screen.active { display: flex; }
   @keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
 
+  /* ГЛАВНЫЙ ЭКРАН */
   #screen-menu { position: relative; overflow: hidden; }
   
   .fullscreen-video {
@@ -30,43 +31,40 @@
     object-fit: cover;
     display: block;
   }
-  
-  .video-overlay {
+
+  /* НАДПИСЬ В УГЛУ */
+  .title-pill {
     position: absolute;
-    inset: 0;
-    background: linear-gradient(180deg, rgba(245, 237, 227, 0.4) 0%, rgba(245, 237, 227, 0.2) 50%, rgba(139, 115, 85, 0.5) 100%);
-    z-index: 1;
-    pointer-events: none;
-  }
-  
-  .menu-content {
-    position: relative;
-    z-index: 2;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    padding: 0 30px;
-    padding-bottom: calc(80px + env(safe-area-inset-bottom));
+    top: calc(env(safe-area-inset-top) + 16px);
+    left: 16px;
+    z-index: 3;
+    background: rgba(255, 255, 255, 0.35);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1.5px solid rgba(255, 255, 255, 0.8);
+    border-radius: 25px;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 800;
+    font-family: 'Montserrat', sans-serif;
+    color: #fff;
+    letter-spacing: 0.3px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2), inset 0 1px 8px rgba(255,255,255,0.7);
   }
 
-  .title-pill {
-    background: rgba(255, 255, 255, 0.4);
-    backdrop-filter: blur(15px);
-    border: 2px solid rgba(255, 255, 255, 0.9);
-    border-radius: 30px;
-    padding: 12px 30px;
-    margin-bottom: 40px;
-    font-size: 20px;
-    font-weight: 900;
-    font-family: 'Montserrat', sans-serif;
-    color: #6B5A45;
-    box-shadow: 0 8px 25px rgba(139, 115, 85, 0.2), inset 0 2px 10px rgba(255,255,255,0.9);
+  /* КНОПКА ПО ЦЕНТРУ СНИЗУ */
+  .menu-content {
+    position: absolute;
+    bottom: calc(60px + env(safe-area-inset-bottom));
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
   }
 
   .cashmere-btn {
     background: linear-gradient(135deg, rgba(212, 197, 176, 0.7) 0%, rgba(228, 213, 192, 0.7) 100%);
     backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border: 2px solid rgba(255, 255, 255, 0.9);
     border-radius: 60px;
     padding: 22px 70px;
@@ -80,6 +78,7 @@
   }
   .cashmere-btn:active { transform: scale(0.9); }
 
+  /* ИГРОВОЙ ЭКРАН */
   .game-header { display: flex; justify-content: space-between; width: 100%; margin-bottom: 15px; }
   .pill { 
     background: rgba(255,255,255,0.5); backdrop-filter: blur(10px); border: 1.5px solid rgba(255,255,255,0.8); 
@@ -176,17 +175,22 @@
 <div class="flash-overlay" id="flash"></div>
 
 <div class="app">
+  <!-- ГЛАВНЫЙ ЭКРАН С ВИДЕО -->
   <div class="screen active" id="screen-menu">
     <div class="fullscreen-video">
       <video src="intro.mp4" autoplay loop muted playsinline></video>
     </div>
-    <div class="video-overlay"></div>
+    
+    <!-- НАДПИСЬ В ЛЕВОМ ВЕРХНЕМ УГЛУ -->
+    <div class="title-pill">Мгновенный счёт</div>
+    
+    <!-- КНОПКА ПО ЦЕНТРУ СНИЗУ -->
     <div class="menu-content">
-      <div class="title-pill">Мгновенный счёт</div>
       <button class="cashmere-btn" onclick="startGame()">Старт</button>
     </div>
   </div>
 
+  <!-- ИГРОВОЙ ЭКРАН -->
   <div class="screen" id="screen-game">
     <div class="game-header">
       <div class="pill" id="score">0</div>
@@ -198,6 +202,7 @@
     <div class="numbers-grid" id="numbersGrid"></div>
   </div>
 
+  <!-- ЭКРАН РЕЗУЛЬТАТА -->
   <div class="screen" id="screen-result">
     <div class="result-box">
       <div class="result-title" id="resultTitle">Отлично!</div>
