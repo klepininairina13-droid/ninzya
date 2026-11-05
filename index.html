@@ -3,40 +3,81 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Двурукий Ниндзя — Межполушарная синхронизация</title>
+<title>Мгновенный счёт</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; user-select: none; }
   html, body { width: 100%; height: 100%; height: 100dvh; overflow: hidden; font-family: 'Montserrat', sans-serif; background: #F5EDE3; position: fixed; }
 
-  .bg-blobs { position: absolute; inset: 0; overflow: hidden; z-index: 0; pointer-events: none; }
-  .blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.6; animation: float 10s ease-in-out infinite; }
-  .blob-1 { width: 350px; height: 350px; background: #E8DCC4; top: -80px; left: -80px; }
-  .blob-2 { width: 300px; height: 300px; background: #D4E7D4; bottom: -80px; right: -80px; animation-delay: -3s; }
-  .blob-3 { width: 250px; height: 250px; background: #F0D9E8; top: 40%; left: 60%; animation-delay: -6s; }
-  @keyframes float { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(30px, -30px) scale(1.15); } }
-
-  .app { position: relative; z-index: 1; max-width: 560px; margin: 0 auto; height: 100%; display: flex; flex-direction: column; padding: 20px; padding-top: calc(20px + env(safe-area-inset-top)); }
+  .app { position: relative; z-index: 1; max-width: 560px; margin: 0 auto; height: 100%; display: flex; flex-direction: column; }
 
   .screen { display: none; flex-direction: column; align-items: center; justify-content: center; flex: 1; width: 100%; animation: fadeIn 0.5s ease; }
   .screen.active { display: flex; }
   @keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
 
-  /* ГЛАВНЫЙ ЭКРАН */
-  .title { font-size: 38px; font-weight: 900; color: #8B7355; text-align: center; margin-bottom: 10px; letter-spacing: -1px; }
-  .subtitle { font-size: 15px; font-weight: 700; color: #A89880; text-align: center; margin-bottom: 15px; padding: 0 20px; line-height: 1.4; }
-  .benefits { display: flex; flex-direction: column; gap: 10px; margin-bottom: 30px; padding: 0 20px; width: 100%; max-width: 320px; }
-  .benefit { background: rgba(255,255,255,0.5); backdrop-filter: blur(10px); border: 1.5px solid rgba(255,255,255,0.8); border-radius: 20px; padding: 12px 18px; font-size: 13px; font-weight: 700; color: #6B5A45; box-shadow: 0 4px 15px rgba(139, 115, 85, 0.1); }
+  /* ГЛАВНЫЙ ЭКРАН С ВИДЕО */
+  #screen-menu { position: relative; overflow: hidden; }
+  
+  .fullscreen-video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+  }
+  .fullscreen-video video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  
+  .video-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(245, 237, 227, 0.4) 0%, rgba(245, 237, 227, 0.2) 50%, rgba(139, 115, 85, 0.5) 100%);
+    z-index: 1;
+    pointer-events: none;
+  }
+  
+  .menu-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    padding: 0 30px;
+    padding-bottom: calc(80px + env(safe-area-inset-bottom));
+  }
+
+  .title-pill {
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(15px);
+    border: 2px solid rgba(255, 255, 255, 0.9);
+    border-radius: 30px;
+    padding: 12px 30px;
+    margin-bottom: 40px;
+    font-size: 20px;
+    font-weight: 900;
+    font-family: 'Montserrat', sans-serif;
+    color: #6B5A45;
+    box-shadow: 0 8px 25px rgba(139, 115, 85, 0.2), inset 0 2px 10px rgba(255,255,255,0.9);
+  }
 
   .cashmere-btn {
-    background: linear-gradient(135deg, rgba(212, 197, 176, 0.6) 0%, rgba(228, 213, 192, 0.6) 100%);
-    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    background: linear-gradient(135deg, rgba(212, 197, 176, 0.7) 0%, rgba(228, 213, 192, 0.7) 100%);
+    backdrop-filter: blur(20px);
     border: 2px solid rgba(255, 255, 255, 0.9);
     border-radius: 60px;
     padding: 22px 70px;
-    font-size: 24px; font-weight: 800; font-family: 'Montserrat', sans-serif; color: #6B5A45;
-    box-shadow: 0 12px 35px rgba(139, 115, 85, 0.2), inset 0 3px 15px rgba(255,255,255,0.95);
-    cursor: pointer; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    font-size: 24px;
+    font-weight: 800;
+    font-family: 'Montserrat', sans-serif;
+    color: #6B5A45;
+    box-shadow: 0 12px 35px rgba(139, 115, 85, 0.3), inset 0 3px 15px rgba(255,255,255,0.95);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
   .cashmere-btn:active { transform: scale(0.9); }
 
@@ -50,10 +91,10 @@
 
   .instruction { font-size: 14px; font-weight: 700; color: #8B7355; text-align: center; margin-bottom: 15px; padding: 0 10px; }
 
-  /* ДВЕ ЗОНЫ */
-  .zones-container { display: flex; gap: 15px; width: 100%; flex: 1; margin-bottom: 15px; }
-  .zone {
+  .dots-zone {
     flex: 1;
+    width: 100%;
+    min-height: 250px;
     background: rgba(255,255,255,0.4);
     backdrop-filter: blur(15px);
     border: 2px solid rgba(255,255,255,0.9);
@@ -61,35 +102,53 @@
     display: flex; align-items: center; justify-content: center;
     position: relative; overflow: hidden;
     box-shadow: 0 10px 30px rgba(139, 115, 85, 0.15), inset 0 3px 15px rgba(255,255,255,0.9);
-    transition: all 0.3s ease;
+    margin-bottom: 15px;
   }
-  .zone::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 50%; background: linear-gradient(180deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0) 100%); border-radius: 28px 28px 0 0; pointer-events: none; }
-  
-  .zone.matching {
-    animation: pulse 0.6s ease-in-out infinite;
-    border-color: rgba(200, 255, 100, 0.9);
-    box-shadow: 0 0 40px rgba(200, 255, 100, 0.6), inset 0 3px 15px rgba(255,255,255,0.9);
-  }
-  @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.02); } }
+  .dots-zone::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 50%; background: linear-gradient(180deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0) 100%); border-radius: 28px 28px 0 0; pointer-events: none; }
 
-  .color-circle {
-    width: 70%; height: 70%;
+  .dot {
+    position: absolute;
+    width: 40px; height: 40px;
     border-radius: 50%;
-    transition: all 0.3s ease;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2), inset 0 5px 20px rgba(255,255,255,0.4);
-    position: relative;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.2), inset 0 3px 8px rgba(255,255,255,0.5);
+    animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
-  .color-circle::before { content: ''; position: absolute; top: 10%; left: 10%; right: 10%; height: 30%; background: linear-gradient(180deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 100%); border-radius: 50%; pointer-events: none; }
+  .dot::before { content: ''; position: absolute; top: 15%; left: 15%; right: 15%; height: 30%; background: linear-gradient(180deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0) 100%); border-radius: 50%; pointer-events: none; }
+  @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+  @keyframes popOut { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(0); opacity: 0; } }
 
-  .zone-label { position: absolute; bottom: 15px; font-size: 12px; font-weight: 800; color: rgba(139, 115, 85, 0.5); text-transform: uppercase; letter-spacing: 1px; }
+  .numbers-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    width: 100%;
+    max-width: 280px;
+    margin-bottom: calc(20px + env(safe-area-inset-bottom));
+    transition: opacity 0.3s ease;
+  }
+  .number-btn {
+    aspect-ratio: 1.5;
+    background: rgba(255,255,255,0.5);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255,255,255,0.9);
+    border-radius: 25px;
+    font-size: 36px; font-weight: 900; font-family: 'Montserrat', sans-serif; color: #6B5A45;
+    box-shadow: 0 8px 20px rgba(139, 115, 85, 0.15), inset 0 3px 10px rgba(255,255,255,0.9);
+    cursor: pointer; transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .number-btn:active { transform: scale(0.9); }
+  .number-btn.correct {
+    background: linear-gradient(135deg, #B5EAD7 0%, #C8F0E1 100%);
+    animation: correctPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .number-btn.wrong {
+    animation: shake 0.4s ease;
+    background: linear-gradient(135deg, rgba(255, 195, 208, 0.7) 0%, rgba(255, 210, 220, 0.7) 100%);
+  }
+  @keyframes correctPop { 0% { transform: scale(1); } 40% { transform: scale(1.15); } 100% { transform: scale(1); } }
+  @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
 
-  /* ТАЙМЕР И СТАТИСТИКА */
-  .stats-bar { display: flex; justify-content: space-around; width: 100%; padding: 15px; background: rgba(255,255,255,0.4); backdrop-filter: blur(15px); border: 1.5px solid rgba(255,255,255,0.8); border-radius: 30px; box-shadow: 0 6px 20px rgba(139, 115, 85, 0.1); }
-  .stat-item { text-align: center; }
-  .stat-value { font-size: 22px; font-weight: 900; color: #6B5A45; }
-  .stat-label { font-size: 10px; font-weight: 700; color: #A89880; text-transform: uppercase; letter-spacing: 0.5px; }
-
-  /* ЧАСТИЦЫ */
   .particle {
     position: absolute; border-radius: 50%; pointer-events: none; z-index: 100;
     animation: explode 0.8s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
@@ -102,7 +161,6 @@
   .flash-overlay { position: absolute; inset: 0; z-index: 99; pointer-events: none; opacity: 0; transition: opacity 0.1s ease; }
   .flash-overlay.active { opacity: 0.5; }
 
-  /* РЕЗУЛЬТАТ */
   .result-box { 
     background: rgba(255,255,255,0.5); backdrop-filter: blur(25px); border: 2px solid rgba(255,255,255,0.9); 
     border-radius: 50px; padding: 50px 40px; text-align: center; 
@@ -117,61 +175,39 @@
 </head>
 <body>
 
-<div class="bg-blobs">
-  <div class="blob blob-1"></div>
-  <div class="blob blob-2"></div>
-  <div class="blob blob-3"></div>
-</div>
-
-<div class="flash-overlay" id="flash"></div>
-
 <div class="app">
-  <!-- МЕНЮ -->
+  <!-- ГЛАВНЫЙ ЭКРАН С ВИДЕО -->
   <div class="screen active" id="screen-menu">
-    <div class="title">Двурукий Ниндзя</div>
-    <div class="subtitle">Межполушарная синхронизация мозга</div>
-    <div class="benefits">
-      <div class="benefit">🧠 Синхронизирует левое и правое полушарие</div>
-      <div class="benefit">⚡ Увеличивает скорость обработки информации</div>
-      <div class="benefit">👁️ Развивает периферийное зрение</div>
-      <div class="benefit">🎯 Тренирует координацию двух рук</div>
+    <div class="fullscreen-video">
+      <video src="intro.mp4" autoplay loop muted playsinline></video>
     </div>
-    <button class="cashmere-btn" onclick="startGame()">Начать</button>
+    <div class="video-overlay"></div>
+    <div class="menu-content">
+      <div class="title-pill">Мгновенный счёт</div>
+      <button class="cashmere-btn" onclick="startGame()">Старт</button>
+    </div>
   </div>
 
-  <!-- ИГРА -->
+  <!-- ИГРОВОЙ ЭКРАН -->
   <div class="screen" id="screen-game">
     <div class="game-header">
       <div class="pill" id="score">0</div>
       <div class="pill" id="combo">x1</div>
-      <div class="pill" id="timer">01:00</div>
+      <div class="pill" id="level">Уровень 1</div>
     </div>
-    <div class="instruction">Тапни ДВУМЯ пальцами, когда цвета совпадут!</div>
-    <div class="zones-container" id="zonesContainer">
-      <div class="zone" id="zoneLeft">
-        <div class="color-circle" id="circleLeft"></div>
-        <div class="zone-label">Левая</div>
-      </div>
-      <div class="zone" id="zoneRight">
-        <div class="color-circle" id="circleRight"></div>
-        <div class="zone-label">Правая</div>
-      </div>
-    </div>
-    <div class="stats-bar">
-      <div class="stat-item"><div class="stat-value" id="hits">0</div><div class="stat-label">Попаданий</div></div>
-      <div class="stat-item"><div class="stat-value" id="misses">0</div><div class="stat-label">Ошибок</div></div>
-      <div class="stat-item"><div class="stat-value" id="level">1</div><div class="stat-label">Уровень</div></div>
-    </div>
+    <div class="instruction" id="instruction">Запомни количество точек!</div>
+    <div class="dots-zone" id="dotsZone"></div>
+    <div class="numbers-grid" id="numbersGrid"></div>
   </div>
 
-  <!-- РЕЗУЛЬТАТ -->
+  <!-- ЭКРАН РЕЗУЛЬТАТА -->
   <div class="screen" id="screen-result">
     <div class="result-box">
-      <div class="result-title">Ниндзя-мастер!</div>
+      <div class="result-title" id="resultTitle">Отлично!</div>
       <div class="result-stats">
         <div><div class="stat-val" id="res-score">0</div><div class="stat-lbl">Очки</div></div>
-        <div><div class="stat-val" id="res-hits">0</div><div class="stat-lbl">Попадания</div></div>
-        <div><div class="stat-val" id="res-combo">0</div><div class="stat-lbl">Макс. комбо</div></div>
+        <div><div class="stat-val" id="res-accuracy">0%</div><div class="stat-lbl">Точность</div></div>
+        <div><div class="stat-val" id="res-level">1</div><div class="stat-lbl">Уровень</div></div>
       </div>
       <button class="cashmere-btn" onclick="startGame()" style="padding: 18px 50px; font-size: 20px;">Ещё раз</button>
     </div>
@@ -179,7 +215,7 @@
 </div>
 
 <script>
-  const colors = ['#FF6B8A', '#4ECDC4', '#A78BFA', '#FBBF24', '#34D399', '#F472B6', '#60A5FA', '#FB923C'];
+  const dotColors = ['#FF6B8A', '#4ECDC4', '#A78BFA', '#FBBF24', '#34D399', '#F472B6', '#60A5FA', '#FB923C'];
   
   let gameState = {
     active: false,
@@ -189,13 +225,10 @@
     hits: 0,
     misses: 0,
     level: 1,
-    timeLeft: 60,
-    leftColor: null,
-    rightColor: null,
-    isMatching: false,
-    touchCount: 0,
-    changeInterval: null,
-    timerInterval: null
+    correctNumber: 0,
+    showTime: 1000,
+    rounds: 0,
+    maxRounds: 15
   };
 
   function showScreen(id) {
@@ -204,7 +237,7 @@
   }
 
   function getRandomColor() {
-    return colors[Math.floor(Math.random() * colors.length)];
+    return dotColors[Math.floor(Math.random() * dotColors.length)];
   }
 
   function startGame() {
@@ -216,170 +249,167 @@
       hits: 0,
       misses: 0,
       level: 1,
-      timeLeft: 60,
-      leftColor: getRandomColor(),
-      rightColor: getRandomColor(),
-      isMatching: false,
-      touchCount: 0,
-      changeInterval: null,
-      timerInterval: null
+      correctNumber: 0,
+      showTime: 1000,
+      rounds: 0,
+      maxRounds: 15
     };
 
     updateUI();
     showScreen('screen-game');
-    
-    // Обновляем цвета
-    updateColors();
-    
-    // Меняем цвета каждые N мс (уменьшается с уровнем)
-    const changeRate = Math.max(800, 1500 - gameState.level * 100);
-    gameState.changeInterval = setInterval(changeColors, changeRate);
-    
-    // Таймер
-    gameState.timerInterval = setInterval(() => {
-      gameState.timeLeft--;
-      document.getElementById('timer').textContent = `0${Math.floor(gameState.timeLeft / 60)}:${(gameState.timeLeft % 60).toString().padStart(2, '0')}`;
-      if (gameState.timeLeft <= 0) endGame();
-    }, 1000);
-
-    // Обработчики мультитача
-    setupTouchHandlers();
+    setTimeout(() => nextRound(), 500);
   }
 
-  function updateColors() {
-    // 40% шанс, что цвета совпадут (было ~12.5% при 8 цветах)
-    const shouldMatch = Math.random() < 0.4;
-    
-    gameState.leftColor = getRandomColor();
-    
-    if (shouldMatch) {
-      gameState.rightColor = gameState.leftColor; // Принудительное совпадение
-    } else {
-      // Выбираем другой цвет
-      do {
-        gameState.rightColor = getRandomColor();
-      } while (gameState.rightColor === gameState.leftColor);
-    }
-    
-    document.getElementById('circleLeft').style.background = gameState.leftColor;
-    document.getElementById('circleRight').style.background = gameState.rightColor;
-    
-    checkMatch();
-  }
-
-  function changeColors() {
+  function nextRound() {
     if (!gameState.active) return;
-    updateColors();
+    gameState.rounds++;
+
+    if (gameState.rounds > gameState.maxRounds) {
+      endGame();
+      return;
+    }
+
+    let minDots, maxDots;
+    if (gameState.level <= 3) {
+      minDots = 2;
+      maxDots = 5;
+    } else {
+      minDots = 5;
+      maxDots = 10;
+    }
+    
+    gameState.correctNumber = Math.floor(Math.random() * (maxDots - minDots + 1)) + minDots;
+    gameState.showTime = Math.max(500, 1200 - gameState.level * 100);
+
+    showDots();
+
+    document.getElementById('numbersGrid').style.opacity = '0';
+    document.getElementById('numbersGrid').style.pointerEvents = 'none';
+    document.getElementById('instruction').textContent = 'Запомни количество!';
+
+    setTimeout(() => {
+      hideDots();
+      setTimeout(() => {
+        showNumbers();
+        document.getElementById('instruction').textContent = 'Сколько было точек?';
+      }, 300);
+    }, gameState.showTime);
   }
 
-  function checkMatch() {
-    const isMatch = gameState.leftColor === gameState.rightColor;
-    gameState.isMatching = isMatch;
-    
-    const zoneLeft = document.getElementById('zoneLeft');
-    const zoneRight = document.getElementById('zoneRight');
-    
-    if (isMatch) {
-      zoneLeft.classList.add('matching');
-      zoneRight.classList.add('matching');
-    } else {
-      zoneLeft.classList.remove('matching');
-      zoneRight.classList.remove('matching');
+  function showDots() {
+    const zone = document.getElementById('dotsZone');
+    zone.innerHTML = '';
+    const zoneWidth = zone.offsetWidth || 400;
+    const zoneHeight = zone.offsetHeight || 250;
+    const color = getRandomColor();
+
+    for (let i = 0; i < gameState.correctNumber; i++) {
+      const dot = document.createElement('div');
+      dot.className = 'dot';
+      dot.style.background = color;
+      
+      const x = Math.random() * (zoneWidth - 80) + 20;
+      const y = Math.random() * (zoneHeight - 80) + 20;
+      dot.style.left = x + 'px';
+      dot.style.top = y + 'px';
+      
+      zone.appendChild(dot);
     }
   }
 
-  function setupTouchHandlers() {
-    const container = document.getElementById('zonesContainer');
+  function hideDots() {
+    const dots = document.querySelectorAll('.dot');
+    dots.forEach(dot => {
+      dot.style.animation = 'popOut 0.3s ease forwards';
+    });
+    setTimeout(() => {
+      document.getElementById('dotsZone').innerHTML = '';
+    }, 300);
+  }
+
+  function showNumbers() {
+    const grid = document.getElementById('numbersGrid');
+    grid.innerHTML = '';
+    grid.style.opacity = '1';
+    grid.style.pointerEvents = 'auto';
+
+    const options = new Set([gameState.correctNumber]);
     
-    container.addEventListener('touchstart', (e) => {
-      e.preventDefault();
-      if (!gameState.active) return;
-      
-      gameState.touchCount = e.touches.length;
-      
-      if (gameState.touchCount >= 2) {
-        handleDoubleTap();
-      }
-    }, { passive: false });
+    let wrongAnswer;
+    do {
+      const offset = Math.random() < 0.5 ? -1 : 1;
+      wrongAnswer = gameState.correctNumber + offset;
+      if (wrongAnswer < 1) wrongAnswer = gameState.correctNumber + 2;
+    } while (options.has(wrongAnswer));
+    
+    options.add(wrongAnswer);
 
-    container.addEventListener('touchend', (e) => {
-      e.preventDefault();
-      gameState.touchCount = e.touches.length;
-    }, { passive: false });
+    const shuffled = Array.from(options).sort(() => Math.random() - 0.5);
 
-    // Для десктопа (тестирование)
-    let clickCount = 0;
-    container.addEventListener('click', () => {
-      clickCount++;
-      if (clickCount >= 2) {
-        handleDoubleTap();
-        clickCount = 0;
-      }
-      setTimeout(() => clickCount = 0, 300);
+    shuffled.forEach(num => {
+      const btn = document.createElement('div');
+      btn.className = 'number-btn';
+      btn.textContent = num;
+      btn.onclick = () => handleAnswer(num, btn);
+      grid.appendChild(btn);
     });
   }
 
-  function handleDoubleTap() {
+  function handleAnswer(num, btn) {
     if (!gameState.active) return;
-    
-    if (gameState.isMatching) {
-      // ПРАВИЛЬНО!
+
+    if (num === gameState.correctNumber) {
+      btn.classList.add('correct');
       gameState.hits++;
       gameState.score += 10 * gameState.combo;
       gameState.combo++;
       if (gameState.combo > gameState.maxCombo) gameState.maxCombo = gameState.combo;
-      
-      // Вибрация
+
       if (navigator.vibrate) navigator.vibrate(50);
-      
-      // Взрыв частиц
-      const rect = document.getElementById('zonesContainer').getBoundingClientRect();
-      createExplosion(rect.width / 2, rect.height / 2, gameState.leftColor);
-      triggerFlash(gameState.leftColor);
-      
-      // Звук
+
+      const rect = btn.getBoundingClientRect();
+      createExplosion(rect.left + rect.width / 2, rect.top + rect.height / 2, '#B5EAD7');
+      triggerFlash('#B5EAD7');
+
       playSuccessSound();
-      
-      // Переход на следующий уровень каждые 5 попаданий
+
       if (gameState.hits % 5 === 0) {
         gameState.level++;
-        clearInterval(gameState.changeInterval);
-        const changeRate = Math.max(800, 1500 - gameState.level * 100);
-        gameState.changeInterval = setInterval(changeColors, changeRate);
       }
-      
+
       updateUI();
-      
-      // Новая пара цветов
-      setTimeout(() => updateColors(), 300);
+
+      setTimeout(() => nextRound(), 800);
     } else {
-      // ОШИБКА
+      btn.classList.add('wrong');
       gameState.misses++;
       gameState.combo = 1;
-      
+
       if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
       playErrorSound();
-      
+
       updateUI();
+
+      setTimeout(() => btn.classList.remove('wrong'), 400);
     }
   }
 
   function createExplosion(x, y, color) {
-    for (let i = 0; i < 30; i++) {
+    for (let i = 0; i < 25; i++) {
       const particle = document.createElement('div');
       particle.className = 'particle';
-      const size = Math.random() * 20 + 10;
+      const size = Math.random() * 15 + 8;
       particle.style.width = size + 'px';
       particle.style.height = size + 'px';
       particle.style.background = color;
       particle.style.left = x + 'px';
       particle.style.top = y + 'px';
-      
+
       const angle = Math.random() * Math.PI * 2;
-      const distance = Math.random() * 200 + 80;
+      const distance = Math.random() * 150 + 50;
       particle.style.setProperty('--tx', Math.cos(angle) * distance + 'px');
       particle.style.setProperty('--ty', Math.sin(angle) * distance + 'px');
-      
+
       document.body.appendChild(particle);
       setTimeout(() => particle.remove(), 800);
     }
@@ -395,9 +425,7 @@
   function updateUI() {
     document.getElementById('score').textContent = gameState.score;
     document.getElementById('combo').textContent = 'x' + gameState.combo;
-    document.getElementById('hits').textContent = gameState.hits;
-    document.getElementById('misses').textContent = gameState.misses;
-    document.getElementById('level').textContent = gameState.level;
+    document.getElementById('level').textContent = 'Уровень ' + gameState.level;
   }
 
   function playSuccessSound() {
@@ -432,13 +460,17 @@
 
   function endGame() {
     gameState.active = false;
-    clearInterval(gameState.changeInterval);
-    clearInterval(gameState.timerInterval);
-    
+    const accuracy = gameState.hits + gameState.misses > 0 
+      ? Math.round(gameState.hits / (gameState.hits + gameState.misses) * 100) 
+      : 0;
+
     document.getElementById('res-score').textContent = gameState.score;
-    document.getElementById('res-hits').textContent = gameState.hits;
-    document.getElementById('res-combo').textContent = gameState.maxCombo;
-    
+    document.getElementById('res-accuracy').textContent = accuracy + '%';
+    document.getElementById('res-level').textContent = gameState.level;
+
+    const title = accuracy >= 80 ? 'Гений!' : accuracy >= 60 ? 'Отлично!' : 'Хорошо!';
+    document.getElementById('resultTitle').textContent = title;
+
     showScreen('screen-result');
   }
 </script>
